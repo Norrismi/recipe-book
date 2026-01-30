@@ -68,7 +68,7 @@ export default function RecipeFilters({
   return (
     <div className="mb-6 space-y-4">
       {/* Search and Filter Toggle */}
-      <div className="flex gap-3">
+      <div className="flex gap-3 flex-col sm:flex-row">
         <form onSubmit={handleSearchSubmit} className="flex-1 flex gap-2">
           <div className="relative flex-1">
             <input
@@ -76,19 +76,21 @@ export default function RecipeFilters({
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               placeholder="Search recipes..."
-              className="w-full pl-10 pr-4 py-2.5 bg-white border border-sage-200 
-                       rounded-lg focus:ring-2 focus:ring-sage-400 
-                       focus:border-transparent transition-all"
+              className="w-full pl-10 pr-4 py-2.5 bg-[var(--background)] border border-[var(--border)] 
+                       rounded-lg text-[var(--foreground)] placeholder-[var(--muted-foreground)]
+                       focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50 
+                       transition-all"
             />
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sage-400">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--muted-foreground)]">
               🔍
             </span>
           </div>
           <button
             type="submit"
             disabled={isPending}
-            className="px-4 py-2.5 bg-sage-600 text-white rounded-lg 
-                     hover:bg-sage-700 disabled:opacity-50 transition-colors"
+            className="px-4 py-2.5 bg-[var(--accent)] text-white rounded-lg 
+                     hover:bg-[var(--accent)]/90 disabled:opacity-50 disabled:cursor-not-allowed 
+                     transition-colors flex items-center gap-2"
           >
             Search
           </button>
@@ -98,14 +100,14 @@ export default function RecipeFilters({
           onClick={() => setShowFilters(!showFilters)}
           className={`px-4 py-2.5 border rounded-lg transition-colors flex items-center gap-2
                     ${showFilters || hasActiveFilters
-                      ? "bg-sage-100 border-sage-300 text-sage-800"
-                      : "bg-white border-sage-200 text-sage-600 hover:bg-sage-50"
+                      ? "bg-[var(--muted)] border-[var(--border)] text-[var(--foreground)]"
+                      : "bg-[var(--card)] border-[var(--border)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]"
                     }`}
         >
           <span>🎛️</span>
           <span className="hidden sm:inline">Filters</span>
           {hasActiveFilters && (
-            <span className="w-5 h-5 bg-sage-600 text-white text-xs rounded-full 
+            <span className="w-5 h-5 bg-[var(--accent)] text-white text-xs rounded-full 
                            flex items-center justify-center">
               {(initialTags.length > 0 ? 1 : 0) + 
                (initialMinStars ? 1 : 0) + 
@@ -117,17 +119,17 @@ export default function RecipeFilters({
 
       {/* Expanded Filters */}
       {showFilters && (
-        <div className="bg-white rounded-xl p-4 shadow-card space-y-4">
+        <div className="bg-[var(--card)] rounded-xl p-4 shadow-card space-y-4 border border-[var(--border)]">
           {/* Sort */}
           <div>
-            <label className="block text-sm font-medium text-sage-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-2">
               Sort by
             </label>
             <select
               value={initialSort}
               onChange={(e) => updateFilters({ sort: e.target.value })}
-              className="w-full px-3 py-2 border border-sage-200 rounded-lg
-                       focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+              className="w-full px-3 py-2 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                       text-[var(--foreground)] focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
             >
               <option value="created_at">Recently Added</option>
               <option value="title">Title (A-Z)</option>
@@ -137,20 +139,20 @@ export default function RecipeFilters({
 
           {/* Star Rating Filter */}
           <div>
-            <label className="block text-sm font-medium text-sage-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-2">
               Minimum Rating
             </label>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               {[undefined, 1, 2, 3].map((stars) => (
                 <button
                   key={stars ?? "all"}
                   onClick={() => updateFilters({ 
                     minStars: stars?.toString() 
                   })}
-                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors
+                  className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors border border-[var(--border)]
                             ${initialMinStars === stars || (!initialMinStars && !stars)
-                              ? "bg-sage-600 text-white"
-                              : "bg-sage-100 text-sage-700 hover:bg-sage-200"
+                              ? "bg-[var(--accent)] text-white"
+                              : "bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]/80"
                             }`}
                 >
                   {stars ? `${"⭐".repeat(stars)}+` : "All"}
@@ -161,7 +163,7 @@ export default function RecipeFilters({
 
           {/* Tags Filter */}
           <div>
-            <label className="block text-sm font-medium text-sage-700 mb-2">
+            <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-2">
               Categories
             </label>
             <div className="flex flex-wrap gap-2">
@@ -171,10 +173,10 @@ export default function RecipeFilters({
                   <button
                     key={tag}
                     onClick={() => toggleTag(tag)}
-                    className={`px-3 py-1.5 rounded-full text-sm transition-colors
+                    className={`px-3 py-1.5 rounded-full text-sm transition-colors border border-[var(--border)]
                               ${isSelected
-                                ? "bg-sage-600 text-white"
-                                : "bg-sage-100 text-sage-700 hover:bg-sage-200"
+                                ? "bg-[var(--accent)] text-white"
+                                : "bg-[var(--muted)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]/80"
                               }`}
                   >
                     {tag}
@@ -188,7 +190,7 @@ export default function RecipeFilters({
           {hasActiveFilters && (
             <button
               onClick={clearFilters}
-              className="text-sm text-sage-600 hover:text-sage-800 underline"
+              className="text-sm text-[var(--accent)] hover:text-[var(--accent)]/80 underline transition-colors"
             >
               Clear all filters
             </button>
@@ -198,7 +200,7 @@ export default function RecipeFilters({
 
       {/* Loading indicator */}
       {isPending && (
-        <div className="flex items-center gap-2 text-sage-600">
+        <div className="flex items-center gap-2 text-[var(--muted-foreground)]">
           <span className="animate-spin">⏳</span>
           <span>Updating...</span>
         </div>

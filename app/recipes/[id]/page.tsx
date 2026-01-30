@@ -16,7 +16,7 @@ export default async function RecipeDetailPage({ params }: PageProps) {
   }
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <Navigation />
       <RecipeDetailClient recipe={recipe} />
     </div>

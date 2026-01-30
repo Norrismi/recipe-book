@@ -17,15 +17,15 @@ export default async function GroceriesPage() {
   );
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <Navigation />
       
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-6">
-          <h1 className="text-3xl font-display font-semibold text-sage-800">
+          <h1 className="text-3xl font-display font-semibold text-[var(--foreground)]">
             Grocery List
           </h1>
-          <p className="text-sage-600 mt-1">
+          <p className="text-[var(--muted-foreground)] mt-1">
             {uniqueRecipes.length > 0
               ? `Ingredients for ${uniqueRecipes.length} recipe${uniqueRecipes.length !== 1 ? "s" : ""} this week`
               : "No meals planned yet - add recipes to your meal plan!"}

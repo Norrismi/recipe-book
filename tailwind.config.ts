@@ -1,6 +1,8 @@
 import type { Config } from "tailwindcss";
 
 const config: Config = {
+  darkMode: 'class',  // ← Added this line: enables dark: variant when .dark class is on <html>
+
   content: [
     "./pages/**/*.{js,ts,jsx,tsx,mdx}",
     "./components/**/*.{js,ts,jsx,tsx,mdx}",
@@ -9,7 +11,7 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        // Warm, inviting cookbook palette
+        // Warm, inviting cookbook palette (light mode defaults)
         cream: "#FDF8F3",
         sage: {
           50: "#F4F7F4",
@@ -37,6 +39,30 @@ const config: Config = {
         },
         terracotta: "#C4704F",
         parchment: "#F5EEE6",
+
+        // Optional: Add semantic dark-mode-friendly colors here if you want cleaner usage
+        // (e.g., bg-background instead of bg-cream dark:bg-slate-950)
+        // You can skip this for now and just use dark: prefixes directly.
+        background: {
+          light: "#FDF8F3",          // cream
+          DEFAULT: "#FDF8F3",
+          dark: "#0f172a",           // slate-950 — deep slate with subtle blue undertone
+        },
+        foreground: {
+          light: "#1F2F1F",          // sage-900
+          DEFAULT: "#1F2F1F",
+          dark: "#f1f5f9",           // slate-100 — crisp light text
+        },
+        card: {
+          light: "#FFFFFF",
+          DEFAULT: "#FFFFFF",
+          dark: "#1e293b",           // slate-800 — slightly elevated surfaces
+        },
+        muted: {
+          light: "#F5EEE6",          // parchment
+          DEFAULT: "#F5EEE6",
+          dark: "#334155",           // slate-700
+        },
       },
       fontFamily: {
         display: ["Georgia", "Cambria", "serif"],
@@ -50,4 +76,5 @@ const config: Config = {
   },
   plugins: [],
 };
+
 export default config;

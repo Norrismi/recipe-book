@@ -126,18 +126,18 @@ export default function GroceryListClient({ recipes, mealPlans }: GroceryListCli
 
   if (recipes.length === 0) {
     return (
-      <div className="text-center py-16 bg-white rounded-xl shadow-card">
+      <div className="text-center py-16 bg-[var(--card)] rounded-xl shadow-card border border-[var(--border)]">
         <div className="text-5xl mb-4">📝</div>
-        <h2 className="text-xl font-semibold text-sage-800 mb-2">
+        <h2 className="text-xl font-semibold text-[var(--foreground)] mb-2">
           No Meals Planned
         </h2>
-        <p className="text-sage-600 mb-6 max-w-md mx-auto">
+        <p className="text-[var(--muted-foreground)] mb-6 max-w-md mx-auto">
           Add some recipes to your weekly meal plan to generate a grocery list.
         </p>
         <Link
           href="/plan"
-          className="inline-flex items-center gap-2 px-6 py-3 bg-sage-600 
-                   text-white font-medium rounded-lg hover:bg-sage-700 
+          className="inline-flex items-center gap-2 px-6 py-3 bg-[var(--accent)] 
+                   text-white font-medium rounded-lg hover:bg-[var(--accent)]/90 
                    transition-colors"
         >
           <span>📅</span>
@@ -150,14 +150,14 @@ export default function GroceryListClient({ recipes, mealPlans }: GroceryListCli
   return (
     <div className="space-y-6">
       {/* Stats and Controls */}
-      <div className="bg-white rounded-xl shadow-card p-4">
+      <div className="bg-[var(--card)] rounded-xl shadow-card p-4 border border-[var(--border)]">
         <div className="flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <span className="text-sage-600">
-              <span className="font-semibold text-sage-800">{uncheckedCount}</span> items remaining
+            <span className="text-[var(--muted-foreground)]">
+              <span className="font-semibold text-[var(--foreground)]">{uncheckedCount}</span> items remaining
             </span>
             {checkedCount > 0 && (
-              <span className="text-sage-500">
+              <span className="text-[var(--muted-foreground)]">
                 ({checkedCount} checked)
               </span>
             )}
@@ -166,13 +166,13 @@ export default function GroceryListClient({ recipes, mealPlans }: GroceryListCli
           <div className="flex items-center gap-3">
             <button
               onClick={() => setShowChecked(!showChecked)}
-              className="text-sm text-sage-600 hover:text-sage-800"
+              className="text-sm text-[var(--accent)] hover:text-[var(--accent)]/80"
             >
               {showChecked ? "Hide checked" : "Show checked"}
             </button>
             <button
               onClick={() => toggleAll(false)}
-              className="text-sm text-sage-600 hover:text-sage-800"
+              className="text-sm text-[var(--accent)] hover:text-[var(--accent)]/80"
             >
               Uncheck all
             </button>
@@ -181,8 +181,8 @@ export default function GroceryListClient({ recipes, mealPlans }: GroceryListCli
       </div>
 
       {/* Recipes included */}
-      <div className="bg-white rounded-xl shadow-card p-4">
-        <h3 className="text-sm font-medium text-sage-700 mb-2">
+      <div className="bg-[var(--card)] rounded-xl shadow-card p-4 border border-[var(--border)]">
+        <h3 className="text-sm font-medium text-[var(--muted-foreground)] mb-2">
           Recipes included:
         </h3>
         <div className="flex flex-wrap gap-2">
@@ -190,8 +190,8 @@ export default function GroceryListClient({ recipes, mealPlans }: GroceryListCli
             <Link
               key={recipe.id}
               href={`/recipes/${recipe.id}`}
-              className="px-3 py-1 bg-sage-100 text-sage-700 text-sm rounded-full
-                       hover:bg-sage-200 transition-colors"
+              className="px-3 py-1 bg-[var(--muted)] text-[var(--muted-foreground)] text-sm rounded-full
+                       hover:bg-[var(--muted)]/80 transition-colors"
             >
               {recipe.title}
             </Link>
@@ -209,12 +209,12 @@ export default function GroceryListClient({ recipes, mealPlans }: GroceryListCli
           if (visibleItems.length === 0) return null;
           
           return (
-            <div key={category} className="bg-white rounded-xl shadow-card overflow-hidden">
-              <div className="px-4 py-3 bg-sage-50 border-b border-sage-100">
-                <h3 className="font-semibold text-sage-800">{category}</h3>
+            <div key={category} className="bg-[var(--card)] rounded-xl shadow-card overflow-hidden border border-[var(--border)]">
+              <div className="px-4 py-3 bg-[var(--muted)] border-b border-[var(--border)]">
+                <h3 className="font-semibold text-[var(--foreground)]">{category}</h3>
               </div>
               
-              <ul className="divide-y divide-sage-100">
+              <ul className="divide-y divide-[var(--border)]">
                 {visibleItems.map((item) => {
                   const isChecked = checkedItems.has(item.key);
                   
@@ -225,25 +225,25 @@ export default function GroceryListClient({ recipes, mealPlans }: GroceryListCli
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => toggleItem(item.key)}
-                          className="mt-1 w-5 h-5 rounded border-sage-300 text-sage-600 
-                                   focus:ring-sage-500 cursor-pointer"
+                          className="mt-1 w-5 h-5 rounded border-[var(--border)] accent-[var(--accent)] 
+                                   focus:ring-[var(--accent)]/50 cursor-pointer"
                         />
                         <div className="flex-1">
                           <span
                             className={`block ${
-                              isChecked ? "line-through text-sage-400" : "text-sage-800"
+                              isChecked ? "line-through text-[var(--muted-foreground)]" : "text-[var(--foreground)]"
                             }`}
                           >
                             {item.amount && (
                               <span className="font-medium">{item.amount} </span>
                             )}
                             {item.unit && (
-                              <span className="text-sage-600">{item.unit} </span>
+                              <span className="text-[var(--muted-foreground)]">{item.unit} </span>
                             )}
                             <span className="capitalize">{item.name}</span>
                           </span>
                           {item.fromRecipes.length > 0 && (
-                            <span className="text-xs text-sage-400 mt-0.5 block">
+                            <span className="text-xs text-[var(--muted-foreground)] mt-0.5 block">
                               From: {item.fromRecipes.join(", ")}
                             </span>
                           )}
@@ -262,8 +262,8 @@ export default function GroceryListClient({ recipes, mealPlans }: GroceryListCli
       <div className="flex justify-center pt-4">
         <button
           onClick={() => window.print()}
-          className="px-6 py-3 bg-white border border-sage-200 text-sage-600 
-                   font-medium rounded-lg hover:bg-sage-50 transition-colors 
+          className="px-6 py-3 bg-[var(--card)] border border-[var(--border)] text-[var(--foreground)] 
+                   font-medium rounded-lg hover:bg-[var(--muted)] transition-colors 
                    flex items-center gap-2"
         >
           <span>🖨️</span>

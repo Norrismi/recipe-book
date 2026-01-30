@@ -49,7 +49,6 @@ export default function NewRecipePage() {
     }
 
     if (result.data) {
-      // Populate form with parsed data
       setTitle(result.data.title);
       setSourceUrl(importUrl);
       setImageUrl(result.data.image_url || "");
@@ -58,7 +57,7 @@ export default function NewRecipePage() {
       setServings(result.data.servings);
       setPrepTime(result.data.prep_time || "");
       setCookTime(result.data.cook_time || "");
-      setMode("manual"); // Switch to manual mode to review/edit
+      setMode("manual");
     }
 
     setIsImporting(false);
@@ -94,7 +93,6 @@ export default function NewRecipePage() {
         return;
       }
 
-      // Redirect to the new recipe
       router.push(`/recipes/${result.data?.id}`);
     });
   };
@@ -130,11 +128,11 @@ export default function NewRecipePage() {
   };
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <Navigation />
       
       <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <h1 className="text-3xl font-display font-semibold text-sage-800 mb-6">
+        <h1 className="text-3xl font-display font-semibold text-[var(--foreground)] mb-6">
           Add New Recipe
         </h1>
 
@@ -142,20 +140,20 @@ export default function NewRecipePage() {
         <div className="flex gap-2 mb-6">
           <button
             onClick={() => setMode("import")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors
+            className={`px-4 py-2 rounded-lg font-medium transition-colors border border-[var(--border)]
                       ${mode === "import"
-                        ? "bg-sage-600 text-white"
-                        : "bg-white text-sage-600 hover:bg-sage-50"
+                        ? "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
+                        : "bg-[var(--card)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]"
                       }`}
           >
             🔗 Import from URL
           </button>
           <button
             onClick={() => setMode("manual")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors
+            className={`px-4 py-2 rounded-lg font-medium transition-colors border border-[var(--border)]
                       ${mode === "manual"
-                        ? "bg-sage-600 text-white"
-                        : "bg-white text-sage-600 hover:bg-sage-50"
+                        ? "bg-[var(--accent)] text-white hover:bg-[var(--accent)]/90"
+                        : "bg-[var(--card)] text-[var(--muted-foreground)] hover:bg-[var(--muted)]"
                       }`}
           >
             ✏️ Manual Entry
@@ -164,37 +162,38 @@ export default function NewRecipePage() {
 
         {/* Error Message */}
         {error && (
-          <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-lg text-red-700">
+          <div className="mb-6 p-4 bg-red-900/30 border border-red-700/50 rounded-lg text-red-200">
             {error}
           </div>
         )}
 
         {/* Import Mode */}
         {mode === "import" && (
-          <div className="bg-white rounded-xl p-6 shadow-card mb-6">
-            <h2 className="text-lg font-semibold text-sage-800 mb-4">
+          <div className="bg-[var(--card)] rounded-xl p-6 shadow-card mb-6 border border-[var(--border)]">
+            <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               Import from Recipe Website
             </h2>
-            <p className="text-sage-600 text-sm mb-4">
+            <p className="text-[var(--muted-foreground)] text-sm mb-4">
               Paste a URL from popular recipe sites (AllRecipes, Food Network, etc.) 
-              and we&apos;ll try to extract the recipe details.
+              and we’ll try to extract the recipe details.
             </p>
             
-            <div className="flex gap-3">
+            <div className="flex gap-3 flex-col sm:flex-row">
               <input
                 type="url"
                 value={importUrl}
                 onChange={(e) => setImportUrl(e.target.value)}
                 placeholder="https://example.com/recipe..."
-                className="flex-1 px-4 py-3 border border-sage-200 rounded-lg
-                         focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                className="flex-1 px-4 py-3 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                         text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                         focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
               />
               <button
                 onClick={handleImport}
                 disabled={isImporting || !importUrl.trim()}
-                className="px-6 py-3 bg-sage-600 text-white font-medium rounded-lg
-                         hover:bg-sage-700 disabled:opacity-50 disabled:cursor-not-allowed
-                         transition-colors flex items-center gap-2"
+                className="px-6 py-3 bg-[var(--accent)] text-white font-medium rounded-lg
+                         hover:bg-[var(--accent)]/90 disabled:opacity-50 disabled:cursor-not-allowed
+                         transition-colors flex items-center justify-center gap-2 min-w-[140px]"
               >
                 {isImporting ? (
                   <>
@@ -210,7 +209,7 @@ export default function NewRecipePage() {
               </button>
             </div>
 
-            <p className="mt-4 text-xs text-sage-500">
+            <p className="mt-4 text-xs text-[var(--muted-foreground)]">
               Note: Not all websites can be parsed. If import fails, you can enter 
               the recipe manually.
             </p>
@@ -221,12 +220,12 @@ export default function NewRecipePage() {
         {mode === "manual" && (
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Basic Info */}
-            <div className="bg-white rounded-xl p-6 shadow-card space-y-4">
-              <h2 className="text-lg font-semibold text-sage-800">Basic Info</h2>
+            <div className="bg-[var(--card)] rounded-xl p-6 shadow-card space-y-4 border border-[var(--border)]">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Basic Info</h2>
               
               {/* Title */}
               <div>
-                <label className="block text-sm font-medium text-sage-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
                   Recipe Title *
                 </label>
                 <input
@@ -235,14 +234,15 @@ export default function NewRecipePage() {
                   onChange={(e) => setTitle(e.target.value)}
                   placeholder="Grandma's Apple Pie"
                   required
-                  className="w-full px-4 py-2.5 border border-sage-200 rounded-lg
-                           focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                           text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                           focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                 />
               </div>
 
               {/* Source URL */}
               <div>
-                <label className="block text-sm font-medium text-sage-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
                   Source URL (optional)
                 </label>
                 <input
@@ -250,14 +250,15 @@ export default function NewRecipePage() {
                   value={sourceUrl}
                   onChange={(e) => setSourceUrl(e.target.value)}
                   placeholder="https://example.com/recipe"
-                  className="w-full px-4 py-2.5 border border-sage-200 rounded-lg
-                           focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                           text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                           focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                 />
               </div>
 
               {/* Image URL */}
               <div>
-                <label className="block text-sm font-medium text-sage-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
                   Image URL (optional)
                 </label>
                 <input
@@ -265,11 +266,12 @@ export default function NewRecipePage() {
                   value={imageUrl}
                   onChange={(e) => setImageUrl(e.target.value)}
                   placeholder="https://example.com/image.jpg"
-                  className="w-full px-4 py-2.5 border border-sage-200 rounded-lg
-                           focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                  className="w-full px-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                           text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                           focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                 />
                 {imageUrl && (
-                  <div className="mt-2 w-32 h-24 bg-sage-100 rounded-lg overflow-hidden">
+                  <div className="mt-2 w-32 h-24 bg-[var(--muted)] rounded-lg overflow-hidden border border-[var(--border)]">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img 
                       src={imageUrl} 
@@ -286,7 +288,7 @@ export default function NewRecipePage() {
               {/* Time and Servings */}
               <div className="grid grid-cols-3 gap-4">
                 <div>
-                  <label className="block text-sm font-medium text-sage-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
                     Prep Time (min)
                   </label>
                   <input
@@ -295,12 +297,13 @@ export default function NewRecipePage() {
                     onChange={(e) => setPrepTime(e.target.value ? Number(e.target.value) : "")}
                     min="0"
                     placeholder="15"
-                    className="w-full px-4 py-2.5 border border-sage-200 rounded-lg
-                             focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                             text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                             focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-sage-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
                     Cook Time (min)
                   </label>
                   <input
@@ -309,12 +312,13 @@ export default function NewRecipePage() {
                     onChange={(e) => setCookTime(e.target.value ? Number(e.target.value) : "")}
                     min="0"
                     placeholder="30"
-                    className="w-full px-4 py-2.5 border border-sage-200 rounded-lg
-                             focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                             text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                             focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-sage-700 mb-1">
+                  <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
                     Servings
                   </label>
                   <input
@@ -322,16 +326,17 @@ export default function NewRecipePage() {
                     value={servings}
                     onChange={(e) => setServings(Number(e.target.value) || 4)}
                     min="1"
-                    className="w-full px-4 py-2.5 border border-sage-200 rounded-lg
-                             focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                    className="w-full px-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                             text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                             focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                   />
                 </div>
               </div>
             </div>
 
             {/* Ingredients */}
-            <div className="bg-white rounded-xl p-6 shadow-card space-y-4">
-              <h2 className="text-lg font-semibold text-sage-800">Ingredients</h2>
+            <div className="bg-[var(--card)] rounded-xl p-6 shadow-card space-y-4 border border-[var(--border)]">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Ingredients</h2>
               
               {ingredients.map((ing, index) => (
                 <div key={index} className="flex gap-2 items-start">
@@ -340,29 +345,32 @@ export default function NewRecipePage() {
                     value={ing.amount}
                     onChange={(e) => updateIngredient(index, "amount", e.target.value)}
                     placeholder="2"
-                    className="w-16 px-3 py-2 border border-sage-200 rounded-lg text-sm
-                             focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                    className="w-16 px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--background)]
+                             text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                             focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                   />
                   <input
                     type="text"
                     value={ing.unit}
                     onChange={(e) => updateIngredient(index, "unit", e.target.value)}
                     placeholder="cups"
-                    className="w-20 px-3 py-2 border border-sage-200 rounded-lg text-sm
-                             focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                    className="w-20 px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--background)]
+                             text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                             focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                   />
                   <input
                     type="text"
                     value={ing.name}
                     onChange={(e) => updateIngredient(index, "name", e.target.value)}
                     placeholder="all-purpose flour"
-                    className="flex-1 px-3 py-2 border border-sage-200 rounded-lg text-sm
-                             focus:ring-2 focus:ring-sage-400 focus:border-transparent"
+                    className="flex-1 px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--background)]
+                             text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                             focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                   />
                   <button
                     type="button"
                     onClick={() => removeIngredient(index)}
-                    className="p-2 text-sage-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-[var(--muted-foreground)] hover:text-red-400 transition-colors"
                     aria-label="Remove ingredient"
                   >
                     ✕
@@ -373,7 +381,7 @@ export default function NewRecipePage() {
               <button
                 type="button"
                 onClick={addIngredient}
-                className="text-sm text-sage-600 hover:text-sage-800 flex items-center gap-1"
+                className="text-sm text-[var(--accent)] hover:text-[var(--accent)]/80 flex items-center gap-1 transition-colors"
               >
                 <span>➕</span>
                 <span>Add Ingredient</span>
@@ -381,13 +389,13 @@ export default function NewRecipePage() {
             </div>
 
             {/* Instructions */}
-            <div className="bg-white rounded-xl p-6 shadow-card space-y-4">
-              <h2 className="text-lg font-semibold text-sage-800">Instructions</h2>
+            <div className="bg-[var(--card)] rounded-xl p-6 shadow-card space-y-4 border border-[var(--border)]">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Instructions</h2>
               
               {instructions.map((inst, index) => (
                 <div key={index} className="flex gap-2 items-start">
-                  <span className="w-8 h-8 flex items-center justify-center bg-sage-100 
-                                 text-sage-600 rounded-full text-sm font-medium flex-shrink-0">
+                  <span className="w-8 h-8 flex items-center justify-center bg-[var(--muted)] 
+                                 text-[var(--muted-foreground)] rounded-full text-sm font-medium flex-shrink-0">
                     {index + 1}
                   </span>
                   <textarea
@@ -395,13 +403,14 @@ export default function NewRecipePage() {
                     onChange={(e) => updateInstruction(index, e.target.value)}
                     placeholder="Describe this step..."
                     rows={2}
-                    className="flex-1 px-3 py-2 border border-sage-200 rounded-lg text-sm
-                             focus:ring-2 focus:ring-sage-400 focus:border-transparent resize-none"
+                    className="flex-1 px-3 py-2 border border-[var(--border)] rounded-lg text-sm bg-[var(--background)]
+                             text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                             focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50 resize-none"
                   />
                   <button
                     type="button"
                     onClick={() => removeInstruction(index)}
-                    className="p-2 text-sage-400 hover:text-red-500 transition-colors"
+                    className="p-2 text-[var(--muted-foreground)] hover:text-red-400 transition-colors"
                     aria-label="Remove step"
                   >
                     ✕
@@ -412,7 +421,7 @@ export default function NewRecipePage() {
               <button
                 type="button"
                 onClick={addInstruction}
-                className="text-sm text-sage-600 hover:text-sage-800 flex items-center gap-1"
+                className="text-sm text-[var(--accent)] hover:text-[var(--accent)]/80 flex items-center gap-1 transition-colors"
               >
                 <span>➕</span>
                 <span>Add Step</span>
@@ -420,12 +429,12 @@ export default function NewRecipePage() {
             </div>
 
             {/* Personal Notes */}
-            <div className="bg-white rounded-xl p-6 shadow-card space-y-4">
-              <h2 className="text-lg font-semibold text-sage-800">Your Notes</h2>
+            <div className="bg-[var(--card)] rounded-xl p-6 shadow-card space-y-4 border border-[var(--border)]">
+              <h2 className="text-lg font-semibold text-[var(--foreground)]">Your Notes</h2>
               
               {/* Rating */}
               <div>
-                <label className="block text-sm font-medium text-sage-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-2">
                   Your Rating
                 </label>
                 <StarRating rating={stars} onChange={setStars} size="lg" />
@@ -433,7 +442,7 @@ export default function NewRecipePage() {
 
               {/* Notes */}
               <div>
-                <label className="block text-sm font-medium text-sage-700 mb-1">
+                <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
                   Personal Notes & Tweaks
                 </label>
                 <textarea
@@ -441,14 +450,15 @@ export default function NewRecipePage() {
                   onChange={(e) => setNotes(e.target.value)}
                   placeholder="Add 1/4 tsp more cinnamon, use Granny Smith apples..."
                   rows={3}
-                  className="w-full px-4 py-2.5 border border-sage-200 rounded-lg
-                           focus:ring-2 focus:ring-sage-400 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2.5 border border-[var(--border)] rounded-lg bg-[var(--background)]
+                           text-[var(--foreground)] placeholder-[var(--muted-foreground)]/60
+                           focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50 resize-none"
                 />
               </div>
 
               {/* Tags */}
               <div>
-                <label className="block text-sm font-medium text-sage-700 mb-2">
+                <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-2">
                   Categories
                 </label>
                 <TagSelect selectedTags={tags} onChange={setTags} />
@@ -456,20 +466,20 @@ export default function NewRecipePage() {
             </div>
 
             {/* Submit */}
-            <div className="flex gap-4">
+            <div className="flex gap-4 flex-col sm:flex-row">
               <button
                 type="button"
                 onClick={() => router.back()}
-                className="px-6 py-3 border border-sage-200 text-sage-600 font-medium 
-                         rounded-lg hover:bg-sage-50 transition-colors"
+                className="px-6 py-3 border border-[var(--border)] text-[var(--muted-foreground)] font-medium 
+                         rounded-lg hover:bg-[var(--muted)] transition-colors"
               >
                 Cancel
               </button>
               <button
                 type="submit"
                 disabled={isPending || !title.trim()}
-                className="flex-1 px-6 py-3 bg-sage-600 text-white font-medium rounded-lg
-                         hover:bg-sage-700 disabled:opacity-50 disabled:cursor-not-allowed
+                className="flex-1 px-6 py-3 bg-[var(--accent)] text-white font-medium rounded-lg
+                         hover:bg-[var(--accent)]/90 disabled:opacity-50 disabled:cursor-not-allowed
                          transition-colors flex items-center justify-center gap-2"
               >
                 {isPending ? (

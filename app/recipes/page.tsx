@@ -31,25 +31,25 @@ export default async function RecipesPage({ searchParams }: PageProps) {
   });
 
   return (
-    <div className="min-h-screen bg-cream">
+    <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
       <Navigation />
       
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
           <div>
-            <h1 className="text-3xl font-display font-semibold text-sage-800">
+            <h1 className="text-3xl font-display font-semibold text-[var(--foreground)]">
               Recipe Collection
             </h1>
-            <p className="text-sage-600 mt-1">
+            <p className="text-[var(--muted-foreground)] mt-1">
               {recipes.length} recipe{recipes.length !== 1 ? "s" : ""} saved
             </p>
           </div>
           
           <Link
             href="/recipes/new"
-            className="inline-flex items-center gap-2 px-5 py-2.5 bg-sage-600 
-                     text-white font-medium rounded-lg hover:bg-sage-700 
+            className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] 
+                     text-white font-medium rounded-lg hover:bg-[var(--accent)]/90 
                      transition-colors self-start sm:self-auto"
           >
             <span>➕</span>
@@ -67,26 +67,26 @@ export default async function RecipesPage({ searchParams }: PageProps) {
 
         {/* Error State */}
         {error && (
-          <div className="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700 mb-6">
+          <div className="bg-red-900/30 border border-red-700/50 rounded-lg p-4 text-red-200 mb-6">
             {error}
           </div>
         )}
 
         {/* Empty State */}
         {recipes.length === 0 && !error && (
-          <div className="text-center py-16 bg-white rounded-xl shadow-card">
+          <div className="text-center py-16 bg-[var(--card)] rounded-xl shadow-card border border-[var(--border)]">
             {search || tags.length > 0 || minStars ? (
               <>
                 <div className="text-5xl mb-4">🔍</div>
-                <h2 className="text-xl font-semibold text-sage-800 mb-2">
+                <h2 className="text-xl font-semibold text-[var(--foreground)] mb-2">
                   No recipes found
                 </h2>
-                <p className="text-sage-600 mb-4">
+                <p className="text-[var(--muted-foreground)] mb-4">
                   Try adjusting your filters or search terms
                 </p>
                 <Link
                   href="/recipes"
-                  className="text-sage-600 hover:text-sage-800 underline"
+                  className="text-[var(--accent)] hover:text-[var(--accent)]/80 underline"
                 >
                   Clear all filters
                 </Link>
@@ -94,16 +94,16 @@ export default async function RecipesPage({ searchParams }: PageProps) {
             ) : (
               <>
                 <div className="text-5xl mb-4">📖</div>
-                <h2 className="text-xl font-semibold text-sage-800 mb-2">
+                <h2 className="text-xl font-semibold text-[var(--foreground)] mb-2">
                   No recipes yet
                 </h2>
-                <p className="text-sage-600 mb-4">
+                <p className="text-[var(--muted-foreground)] mb-4">
                   Start building your cookbook by adding your first recipe
                 </p>
                 <Link
                   href="/recipes/new"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-sage-600 
-                           text-white font-medium rounded-lg hover:bg-sage-700 
+                  className="inline-flex items-center gap-2 px-5 py-2.5 bg-[var(--accent)] 
+                           text-white font-medium rounded-lg hover:bg-[var(--accent)]/90 
                            transition-colors"
                 >
                   <span>➕</span>

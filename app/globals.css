@@ -2,6 +2,50 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Semantic CSS variables for light/dark mode */
+:root {
+  --background: #FDF8F3;           /* cream - your light bg */
+  --foreground: #1F2F1F;           /* sage-900 - dark text */
+  --card: #FFFFFF;                 /* white cards */
+  --card-foreground: #1F2F1F;      /* sage-900 */
+  --muted: #F5EEE6;                /* parchment */
+  --muted-foreground: #4A6F4A;     /* sage-500 - subtle text */
+  --accent: #EC7426;               /* spice-500 - your warm accent */
+  --border: #C5D4C5;               /* sage-200 - light borders */
+}
+
+/* Dark mode overrides - nice dark slate with subtle blue undertone */
+.dark {
+  --background: hsl(222.2 84% 4.9%);    /* ~slate-950: deep cozy dark */
+  --foreground: hsl(210 40% 98%);       /* ~slate-50: crisp light text */
+  --card: hsl(222.2 84% 9.8%);          /* ~slate-900: slightly lighter surfaces */
+  --card-foreground: hsl(210 40% 98%);
+  --muted: hsl(217.2 32.6% 17.5%);      /* ~slate-800 muted bg */
+  --muted-foreground: hsl(215 20.2% 65.1%); /* ~slate-400 subtle text */
+  --accent: hsl(217 91% 60%);           /* brighter indigo/blue-500 for accents/pop */
+  --border: hsl(217.2 32.6% 27.5%);     /* ~slate-700 borders */
+}
+
+/* Apply variables globally with smooth transition */
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Adjust scrollbar for dark mode */
+.dark ::-webkit-scrollbar-track {
+  background: hsl(222.2 84% 9.8%);      /* ~slate-900 */
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  background: hsl(217.2 32.6% 27.5%);   /* ~slate-700 */
+}
+
+.dark ::-webkit-scrollbar-thumb:hover {
+  background: hsl(217.2 32.6% 37.5%);   /* lighter on hover */
+}
+
 /* Custom scrollbar for a cleaner look */
 ::-webkit-scrollbar {
   width: 8px;

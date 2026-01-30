@@ -25,8 +25,6 @@ export default function StarRating({
 
   const handleClick = (value: number) => {
     if (readonly || !onChange) return;
-    // Clicking the same star toggles it off (sets to previous value)
-    // This allows going back to 0 stars
     if (value === rating) {
       onChange(value - 1);
     } else {
@@ -49,13 +47,16 @@ export default function StarRating({
           onMouseEnter={() => !readonly && setHoverRating(value)}
           disabled={readonly}
           className={`
-            transition-transform duration-100
+            transition-all duration-150
             ${readonly ? "cursor-default" : "cursor-pointer hover:scale-110"}
-            ${value <= displayRating ? "" : "opacity-30 grayscale"}
+            ${value <= displayRating 
+              ? "text-[var(--accent)]" 
+              : "text-[var(--muted-foreground)] opacity-40"
+            }
           `}
           aria-label={`Rate ${value} star${value > 1 ? "s" : ""}`}
         >
-          ⭐
+          ★
         </button>
       ))}
     </div>
