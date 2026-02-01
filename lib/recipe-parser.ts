@@ -1,3 +1,5 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import * as cheerio from "cheerio";
 import { Ingredient } from "@/types/database";
 
@@ -35,15 +37,15 @@ export async function parseRecipeFromUrl(url: string): Promise<ParsedRecipe | nu
     // Try to find JSON-LD structured data (Recipe schema)
     // Most recipe sites include this for SEO
     const jsonLdScripts = $('script[type="application/ld+json"]');
-    
+
     for (let i = 0; i < jsonLdScripts.length; i++) {
       try {
         const jsonText = $(jsonLdScripts[i]).html();
         if (!jsonText) continue;
-        
+
         const json = JSON.parse(jsonText);
         const recipe = findRecipeInJsonLd(json);
-        
+
         if (recipe) {
           return parseJsonLdRecipe(recipe);
         }
@@ -70,8 +72,8 @@ function findRecipeInJsonLd(data: unknown): Record<string, unknown> | null {
 
   // Check if this is a Recipe
   const obj = data as Record<string, unknown>;
-  if (obj["@type"] === "Recipe" || 
-      (Array.isArray(obj["@type"]) && obj["@type"].includes("Recipe"))) {
+  if (obj["@type"] === "Recipe" ||
+    (Array.isArray(obj["@type"]) && obj["@type"].includes("Recipe"))) {
     return obj;
   }
 
@@ -101,7 +103,7 @@ function parseJsonLdRecipe(recipe: Record<string, unknown>): ParsedRecipe {
   // Parse ingredients
   const rawIngredients = recipe.recipeIngredient;
   const ingredients: Ingredient[] = [];
-  
+
   if (Array.isArray(rawIngredients)) {
     for (const ing of rawIngredients) {
       if (typeof ing === "string") {
@@ -113,7 +115,7 @@ function parseJsonLdRecipe(recipe: Record<string, unknown>): ParsedRecipe {
   // Parse instructions
   const rawInstructions = recipe.recipeInstructions;
   const instructions: string[] = [];
-  
+
   if (Array.isArray(rawInstructions)) {
     for (const inst of rawInstructions) {
       if (typeof inst === "string") {
@@ -136,8 +138,8 @@ function parseJsonLdRecipe(recipe: Record<string, unknown>): ParsedRecipe {
     image_url = recipe.image;
   } else if (Array.isArray(recipe.image) && recipe.image.length > 0) {
     const firstImage = recipe.image[0];
-    image_url = typeof firstImage === "string" ? firstImage : 
-                (firstImage as Record<string, unknown>)?.url as string || null;
+    image_url = typeof firstImage === "string" ? firstImage :
+      (firstImage as Record<string, unknown>)?.url as string || null;
   } else if (typeof recipe.image === "object" && recipe.image !== null) {
     image_url = (recipe.image as Record<string, unknown>).url as string || null;
   }
@@ -184,7 +186,7 @@ function parseDuration(duration: string | undefined): number | null {
 
   const hours = parseInt(match[1] || "0", 10);
   const minutes = parseInt(match[2] || "0", 10);
-  
+
   return hours * 60 + minutes || null;
 }
 
@@ -222,7 +224,7 @@ function parseIngredientString(text: string): Ingredient {
   );
 
   const match = text.trim().match(regex);
-  
+
   if (!match) {
     return { amount: "", unit: "", name: text.trim() };
   }
@@ -243,7 +245,7 @@ function parseIngredientString(text: string): Ingredient {
  */
 function parseHtmlFallback($: cheerio.CheerioAPI, url: string): ParsedRecipe {
   // Try to find title
-  const title = 
+  const title =
     $('h1[class*="recipe"]').first().text().trim() ||
     $('h1[class*="title"]').first().text().trim() ||
     $("h1").first().text().trim() ||
@@ -297,14 +299,14 @@ export function aggregateIngredients(
 
   for (const recipe of recipes) {
     const multiplier = recipe.multiplier || 1;
-    
+
     for (const ing of recipe.ingredients) {
       // Create a normalized key for matching
       const key = ing.name.toLowerCase().trim();
-      
+
       const existing = aggregated.get(key);
       const amount = parseFloat(ing.amount.replace(/[^\d.\/]/g, "")) || 0;
-      
+
       // Handle fractions like "1/2"
       let numericAmount = amount;
       if (ing.amount.includes("/")) {
@@ -350,7 +352,7 @@ export function aggregateIngredients(
  */
 function guessCategory(name: string): string {
   const lowerName = name.toLowerCase();
-  
+
   const categories: Record<string, string[]> = {
     "Produce": ["lettuce", "tomato", "onion", "garlic", "carrot", "celery", "pepper", "potato", "apple", "banana", "lemon", "lime", "orange", "avocado", "spinach", "kale", "broccoli", "cucumber", "mushroom", "ginger", "herb", "cilantro", "parsley", "basil", "thyme", "rosemary"],
     "Dairy & Eggs": ["milk", "cream", "butter", "cheese", "yogurt", "egg", "sour cream"],
