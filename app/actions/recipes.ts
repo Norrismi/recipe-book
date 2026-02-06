@@ -5,6 +5,7 @@ import { parseRecipeFromUrl } from "@/lib/recipe-parser";
 import { RecipeInsert, RecipeUpdate, Ingredient } from "@/types/database";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
+import { parseGrokRecipe } from '@/lib/grok-recipe-parser';
 
 /**
  * Parses a recipe from a URL and returns the extracted data.
@@ -234,4 +235,79 @@ export async function updateRecipeRating(id: string, stars: number) {
  */
 export async function updateRecipeNotes(id: string, notes: string) {
   return updateRecipe(id, { notes });
+}
+
+
+// ... existing imports and actions ...
+
+
+
+export async function importGrokRecipe(rawText: string) {
+  'use server';
+
+  const user = await getUser();
+
+  if (!user) {
+    return { success: false, error: 'Not authenticated' };
+  }
+
+  const supabase = await createClient();
+
+  // Parse once — only one declaration
+  const parseResult = parseGrokRecipe(rawText);
+
+  if (!parseResult.recipe) {
+    return { success: false, error: parseResult.error || 'Parse failed' };
+  }
+
+  // Clean up title: take only the actual recipe name if the parser captured the intro text
+  let cleanTitle = parseResult.recipe.title.trim();
+
+  // Common patterns Grok uses – remove intro if title starts with "The video..." or similar
+  if (cleanTitle.toLowerCase().startsWith('the video') || cleanTitle.length > 100) {
+    // Try to extract just the recipe name (often between ** ** or after "is **...**")
+    const match = cleanTitle.match(/\*\*(.+?)\*\*/);
+    if (match && match[1]) {
+      cleanTitle = match[1].trim();
+    } else {
+      // Fallback: take first line or up to first period
+      cleanTitle = cleanTitle.split('.')[0].trim();
+    }
+  }
+
+  // Force a fallback title if still too long or empty
+  if (!cleanTitle || cleanTitle.length < 3 || cleanTitle.length > 120) {
+    cleanTitle = "Imported Recipe";
+  }
+
+  const toInsert: RecipeInsert = {
+    ...parseResult.recipe,
+    title: cleanTitle,   // override here
+    user_id: user.id,
+    tags: parseResult.recipe.source_url?.includes('youtube') || 
+          parseResult.recipe.source_url?.includes('youtu.be')
+      ? [...(parseResult.recipe.tags ?? []), 'YouTube', 'Grok Import']
+      : (parseResult.recipe.tags ?? []),
+  };
+
+  const { data, error } = await supabase
+    .from('recipes')
+    .insert(toInsert)
+    .select('id')
+    .single();
+
+  if (error) {
+    console.error('Insert error:', error);
+    return { success: false, error: error.message };
+  }
+
+  // Revalidate so the new recipe shows up immediately in lists
+  revalidatePath('/recipes');
+  revalidatePath('/');
+
+  return {
+    success: true,
+    recipeId: data.id,
+    warnings: parseResult.warnings ?? undefined,
+  };
 }

@@ -16,6 +16,7 @@ const navItems: NavItem[] = [
   { href: "/", label: "Dashboard", icon: "🏠" },
   { href: "/recipes", label: "Recipes", icon: "📖" },
   { href: "/recipes/new", label: "Add Recipe", icon: "➕" },
+  { href: "/recipes/import-grok", label: "Import from Grok", icon: "🤖" },
   { href: "/plan", label: "Meal Plan", icon: "📅" },
   { href: "/groceries", label: "Groceries", icon: "🛒" },
 ];
@@ -67,7 +68,9 @@ export default function Navigation() {
                 >
                   <span>{item.icon}</span>
                   <span>{item.label}</span>
+          
                 </Link>
+                
               );
             })}
           </div>

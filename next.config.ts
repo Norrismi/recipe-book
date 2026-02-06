@@ -10,6 +10,9 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+
+  // This silences the "multiple lockfiles detected" warning
+  outputFileTracingRoot: "/Users/norris/Documents/vibe/recipe_book",
 };
 
 export default nextConfig;

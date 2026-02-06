@@ -9,6 +9,7 @@ interface RecipeCardProps {
 
 export default function RecipeCard({ recipe }: RecipeCardProps) {
   const totalTime = (recipe.prep_time || 0) + (recipe.cook_time || 0);
+  const isGrokImport = recipe.tags?.includes('Grok Import');
 
   return (
     <Link
@@ -33,7 +34,7 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           </div>
         )}
         
-        {/* Tags overlay */}
+        {/* Tags overlay – keep your existing tags */}
         {recipe.tags.length > 0 && (
           <div className="absolute bottom-2 left-2 flex flex-wrap gap-1">
             {recipe.tags.slice(0, 2).map((tag) => (
@@ -57,11 +58,19 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
 
       {/* Content */}
       <div className="p-4">
-        {/* Title */}
-        <h3 className="font-display font-semibold text-lg text-[var(--foreground)] 
-                     line-clamp-2 group-hover:text-[var(--accent)] transition-colors">
-          {recipe.title}
-        </h3>
+        {/* Title + Grok badge */}
+        <div className="flex flex-col">
+          <h3 className="font-display font-semibold text-lg text-[var(--foreground)] 
+                       line-clamp-2 group-hover:text-[var(--accent)] transition-colors">
+            {recipe.title}
+          </h3>
+
+          {isGrokImport && (
+            <span className="mt-1 text-xs font-medium text-indigo-400/90 italic">
+              Imported from Grok
+            </span>
+          )}
+        </div>
 
         {/* Rating */}
         <div className="mt-2">
@@ -84,10 +93,15 @@ export default function RecipeCard({ recipe }: RecipeCardProps) {
           )}
         </div>
 
-        {/* Source hint */}
-        {recipe.source_url && (
+        {/* Source hint – hide or customize for Grok imports */}
+        {recipe.source_url && !isGrokImport && (
           <p className="mt-2 text-xs text-[var(--muted-foreground)]/80 truncate">
             {new URL(recipe.source_url).hostname.replace("www.", "")}
+          </p>
+        )}
+        {isGrokImport && (
+          <p className="mt-2 text-xs text-indigo-400/70 italic">
+            From YouTube via Grok
           </p>
         )}
       </div>

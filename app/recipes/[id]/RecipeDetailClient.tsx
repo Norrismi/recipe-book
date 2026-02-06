@@ -15,31 +15,31 @@ interface RecipeDetailClientProps {
 export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) {
 
   const [isPending, startTransition] = useTransition();
-  
+
   // Servings scaling
   const [scaledServings, setScaledServings] = useState(recipe.servings);
   const scale = scaledServings / recipe.servings;
-  
+
   // Instruction checkboxes
   const [completedSteps, setCompletedSteps] = useState<Set<number>>(new Set());
-  
+
   // Editing states
   const [isEditingNotes, setIsEditingNotes] = useState(false);
   const [notes, setNotes] = useState(recipe.notes || "");
   const [stars, setStars] = useState(recipe.stars);
-  
+
   // Meal planning modal
   const [showPlanModal, setShowPlanModal] = useState(false);
   const [planDate, setPlanDate] = useState(new Date().toISOString().split("T")[0]);
   const [planMealType, setPlanMealType] = useState<"breakfast" | "lunch" | "dinner" | "snack">("dinner");
-  
+
   // Delete confirmation
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Calculate scaled amount
   const scaleAmount = (amount: string): string => {
     if (!amount) return amount;
-    
+
     if (amount.includes("/")) {
       const parts = amount.split("/");
       if (parts.length === 2) {
@@ -50,19 +50,19 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
         }
       }
     }
-    
+
     if (amount.includes("-")) {
       const [min, max] = amount.split("-").map(Number);
       if (!isNaN(min) && !isNaN(max)) {
         return `${formatScaledAmount(min * scale)}-${formatScaledAmount(max * scale)}`;
       }
     }
-    
+
     const num = parseFloat(amount);
     if (!isNaN(num)) {
       return formatScaledAmount(num * scale);
     }
-    
+
     return amount;
   };
 
@@ -70,16 +70,16 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
     const fractions: [number, string][] = [
       [0.25, "¼"], [0.333, "⅓"], [0.5, "½"], [0.666, "⅔"], [0.75, "¾"],
     ];
-    
+
     const whole = Math.floor(num);
     const decimal = num - whole;
-    
+
     for (const [value, symbol] of fractions) {
       if (Math.abs(decimal - value) < 0.05) {
         return whole > 0 ? `${whole} ${symbol}` : symbol;
       }
     }
-    
+
     if (num < 1) return num.toFixed(2).replace(/\.?0+$/, "");
     return num.toFixed(1).replace(/\.0$/, "");
   };
@@ -153,7 +153,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
               />
             </div>
           )}
-          
+
           <div className="p-6">
             {/* Title and Rating */}
             <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
@@ -172,7 +172,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
                   </a>
                 )}
               </div>
-              
+
               <div className="flex-shrink-0">
                 <StarRating rating={stars} onChange={handleRatingChange} size="lg" />
               </div>
@@ -226,7 +226,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
             <span>📅</span>
             <span>Add to Plan</span>
           </button>
-          
+
           <button
             onClick={() => window.print()}
             className="px-4 py-2 border border-[var(--border)] text-[var(--foreground)] rounded-lg 
@@ -235,7 +235,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
             <span>🖨️</span>
             <span>Print</span>
           </button>
-          
+
           <Link
             href={`/recipes/${recipe.id}/edit`}
             className="px-4 py-2 border border-[var(--border)] text-[var(--foreground)] rounded-lg 
@@ -244,7 +244,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
             <span>✏️</span>
             <span>Edit</span>
           </Link>
-          
+
           <button
             onClick={() => setShowDeleteConfirm(true)}
             className="px-4 py-2 border border-red-700/50 text-red-400 rounded-lg 
@@ -264,12 +264,12 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
               </div>
 
               {/* Servings Adjuster */}
-              <div className="flex items-center gap-3 mb-4 p-3 bg-[var(--muted)] rounded-lg border border-[var(--border)]">
+              <div className="flex items-center gap-3 mb-6 p-3 bg-[var(--muted)] rounded-lg border border-[var(--border)]">
                 <span className="text-sm text-[var(--muted-foreground)]">Servings:</span>
                 <button
                   onClick={() => setScaledServings(Math.max(1, scaledServings - 1))}
                   className="w-8 h-8 flex items-center justify-center bg-[var(--card)] border 
-                           border-[var(--border)] rounded-lg hover:bg-[var(--muted)] transition-colors text-[var(--foreground)]"
+                 border-[var(--border)] rounded-lg hover:bg-[var(--muted)] transition-colors text-[var(--foreground)]"
                 >
                   −
                 </button>
@@ -279,37 +279,68 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
                 <button
                   onClick={() => setScaledServings(scaledServings + 1)}
                   className="w-8 h-8 flex items-center justify-center bg-[var(--card)] border 
-                           border-[var(--border)] rounded-lg hover:bg-[var(--muted)] transition-colors text-[var(--foreground)]"
+                 border-[var(--border)] rounded-lg hover:bg-[var(--muted)] transition-colors text-[var(--foreground)]"
                 >
                   +
                 </button>
                 {scaledServings !== recipe.servings && (
                   <button
                     onClick={() => setScaledServings(recipe.servings)}
-                    className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)]"
+                    className="text-xs text-[var(--muted-foreground)] hover:text-[var(--foreground)] ml-2"
                   >
                     Reset
                   </button>
                 )}
               </div>
+              {/* Improved Ingredient List – with aggressive space normalization */}
+              <ul className="space-y-3">
+                {recipe.ingredients.map((ing: Ingredient, index: number) => {
+                  // 1. Get scaled amount and trim
+                  const scaledAmt = (scaleAmount(ing.amount) || '').trim();
 
-              {/* Ingredient List */}
-              <ul className="space-y-2">
-                {recipe.ingredients.map((ing: Ingredient, index: number) => (
-                  <li key={index} className="flex gap-2 text-[var(--foreground)]">
-                    <span className="font-medium whitespace-nowrap">
-                      {scaleAmount(ing.amount)} {ing.unit}
-                    </span>
-                    <span>{ing.name}</span>
-                    {ing.notes && (
-                      <span className="text-[var(--muted-foreground)] text-sm">({ing.notes})</span>
-                    )}
-                  </li>
-                ))}
+                  // 2. Normalize EVERY field: replace multiple spaces with single, trim
+                  const unit = (ing.unit || '').replace(/\s+/g, ' ').trim();
+                  const name = (ing.name || '').replace(/\s+/g, ' ').trim();
+                  const notes = ing.notes ? `(${ing.notes.replace(/\s+/g, ' ').trim()})` : '';
+
+                  // 3. Build amount + unit safely
+                  let amountUnit = scaledAmt;
+                  if (unit) {
+                    amountUnit += (amountUnit ? ' ' : '') + unit;
+                  }
+
+                  // 4. Final amountUnit + name — ensure single space only
+                  const fullText = [amountUnit, name].filter(Boolean).join(' ');
+
+                  return (
+                    <li
+                      key={index}
+                      className="flex items-start gap-3 text-[var(--foreground)] leading-relaxed"
+                    >
+                      <span className="mt-1.5 flex-shrink-0 w-2 h-2 rounded-full bg-indigo-500/80" />
+
+                      <div className="flex-1 min-w-0 break-words">
+                        <span className="font-medium">
+                          {fullText}
+                        </span>
+                        {notes && (
+                          <span className="text-sm italic ml-1.5 text-[var(--foreground)]">
+                            {notes}
+                          </span>
+                        )}
+                      </div>
+                    </li>
+                  );
+                })}
               </ul>
 
+
+
+
+
+
               {recipe.ingredients.length === 0 && (
-                <p className="text-[var(--muted-foreground)] italic">No ingredients listed</p>
+                <p className="text-[var(--muted-foreground)] italic mt-4">No ingredients listed</p>
               )}
             </div>
           </div>
@@ -319,7 +350,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
             {/* Instructions */}
             <div className="bg-[var(--card)] rounded-xl shadow-card p-6 border border-[var(--border)]">
               <h2 className="text-lg font-semibold text-[var(--foreground)] mb-4">Instructions</h2>
-              
+
               <ol className="space-y-4">
                 {recipe.instructions.map((step: string, index: number) => (
                   <li key={index} className="flex gap-4">
@@ -328,9 +359,9 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
                       className={`flex-shrink-0 w-8 h-8 flex items-center justify-center 
                                 rounded-full border-2 transition-colors no-print
                                 ${completedSteps.has(index)
-                                  ? "bg-[var(--accent)] border-[var(--accent)] text-white"
-                                  : "border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--accent)]"
-                                }`}
+                          ? "bg-[var(--accent)] border-[var(--accent)] text-white"
+                          : "border-[var(--border)] text-[var(--muted-foreground)] hover:border-[var(--accent)]"
+                        }`}
                     >
                       {completedSteps.has(index) ? "✓" : index + 1}
                     </button>
@@ -338,9 +369,8 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
                       <span className="hidden print:inline font-semibold">{index + 1}. </span>
                     </span>
                     <p
-                      className={`flex-1 leading-relaxed ${
-                        completedSteps.has(index) ? "text-[var(--muted-foreground)] line-through" : "text-[var(--foreground)]"
-                      }`}
+                      className={`flex-1 leading-relaxed ${completedSteps.has(index) ? "text-[var(--muted-foreground)] line-through" : "text-[var(--foreground)]"
+                        }`}
                     >
                       {step}
                     </p>
@@ -408,6 +438,13 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
         </div>
       </article>
 
+
+
+
+
+
+
+
       {/* Add to Plan Modal */}
       {showPlanModal && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50">
@@ -415,7 +452,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
             <h3 className="text-lg font-semibold text-[var(--foreground)] mb-4">
               Add to Meal Plan
             </h3>
-            
+
             <div className="space-y-4">
               <div>
                 <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
@@ -429,7 +466,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
                            text-[var(--foreground)] focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
                 />
               </div>
-              
+
               <div>
                 <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-1">
                   Meal
@@ -479,7 +516,7 @@ export default function RecipeDetailClient({ recipe }: RecipeDetailClientProps) 
             <p className="text-[var(--muted-foreground)] mb-6">
               Are you sure you want to delete &quot;{recipe.title}&quot;? This cannot be undone.
             </p>
-            
+
             <div className="flex gap-3">
               <button
                 onClick={() => setShowDeleteConfirm(false)}
