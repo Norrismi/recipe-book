@@ -3,231 +3,282 @@
 import { RecipeInsert, Ingredient } from '@/types/database';
 
 interface ParseResult {
-  recipe: RecipeInsert | null;
-  error?: string;
-  warnings?: string[];
+    recipe: RecipeInsert | null;
+    error?: string;
+    warnings?: string[];
 }
 
 export function parseGrokRecipe(markdown: string): ParseResult {
-  if (!markdown?.trim()) {
-    return { recipe: null, error: 'No content provided' };
-  }
-
-  const lines = markdown.split('\n');
-  const warnings: string[] = [];
-  let state: 'none' | 'ingredients' | 'instructions' | 'notes' = 'none';
-
-  const recipe: Partial<RecipeInsert> = {
-    title: '',
-    source_url: null,
-    image_url: null,
-    ingredients: [],
-    instructions: [],
-    servings: 4,
-    prep_time: null,
-    cook_time: null,
-    stars: 0,
-    notes: null,
-    tags: [],
-  };
-
-  let currentIng: Partial<Ingredient> | null = null;
-
-  for (let i = 0; i < lines.length; i++) {
-    const line = lines[i].trimEnd();
-    if (!line) continue;
-
-    // ── Auto-detect source URL anywhere ───────────────────────────────
-    if (!recipe.source_url) {
-      const urlMatch = line.match(/https?:\/\/(?:www\.)?(youtube\.com|youtu\.be)\/[^\s)]+/i);
-      if (urlMatch) {
-        recipe.source_url = urlMatch[0].replace(/[).,]$/, '');
-      }
+    if (!markdown?.trim()) {
+        return { recipe: null, error: 'No content provided' };
     }
 
-    // ── Title ───────────────────────────────────────────────────────────
-    if (line.startsWith('### ') && !recipe.title) {
-      recipe.title = line.slice(4).trim();
-      continue;
-    }
+    const lines = markdown.split('\n');
+    const warnings: string[] = [];
+    let state: 'none' | 'intro' | 'ingredients' | 'instructions' | 'notes' = 'none';
 
-    // Fallback title from first meaningful line if no ### found
-    if (!recipe.title && line && !line.startsWith('**') && !line.startsWith('-') && state === 'none') {
-      if (line.length > 10 && !line.includes('http') && !line.includes('serves')) {
-        recipe.title = line.trim().replace(/\.$/, '');
-      }
-    }
+    const recipe: Partial<RecipeInsert> = {
+        title: '',
+        source_url: null,
+        image_url: null,
+        ingredients: [],
+        instructions: [],
+        servings: 4, // default fallback
+        prep_time: null,
+        cook_time: null,
+        stars: 0,
+        notes: null,
+        tags: [],
+    };
 
-    // ── Metadata lines (Servings, times, source) ───────────────────────
-    if (line.startsWith('**') && line.includes(':**')) {
-      const [keyPart, ...valParts] = line.split(':**');
-      const key = keyPart.replace(/\*\*/g, '').trim().toLowerCase();
-      const value = valParts.join(':**').trim();
+    let currentIng: Partial<Ingredient> | null = null;
+    const introLines: string[] = []; // collect intro text as fallback for notes/description
 
-      if (key === 'servings' || key.includes('serves')) {
-        const num = parseInt(value.replace(/\D/g, ''), 10);
-        if (!isNaN(num)) recipe.servings = num;
-      } else if (/prep|active/i.test(key)) {
-        recipe.prep_time = timeToMinutes(value);
-      } else if (/cook|bake|roast/i.test(key)) {
-        recipe.cook_time = timeToMinutes(value);
-      } else if (/source|url|video|channel/i.test(key)) {
-        const urlMatch = value.match(/https?:\/\/\S+/i);
-        if (urlMatch) recipe.source_url = urlMatch[0].replace(/[).,]$/, '');
-      }
-      continue;
-    }
+    for (let i = 0; i < lines.length; i++) {
+        const line = lines[i].trimEnd();
+        if (!line) continue;
 
-    // ── Section detection ───────────────────────────────────────────────
-    const lower = line.toLowerCase();
+        const lowerLine = line.toLowerCase();
 
-    if (
-      lower.includes('ingredients') ||
-      lower.includes('**ingredients**') ||
-      (line.startsWith('### ') && lower.includes('ingredients'))
-    ) {
-      state = 'ingredients';
-      continue;
-    }
-
-    if (
-      lower.includes('instructions') ||
-      lower.includes('step') ||
-      lower.includes('method') ||
-      lower.includes('full step-by-step') ||
-      lower.includes('**instructions**') ||
-      lower.includes('**step')
-    ) {
-      state = 'instructions';
-      continue;
-    }
-
-    if (
-      lower.includes('notes') ||
-      lower.includes('tips') ||
-      lower.includes('success') ||
-      lower.includes('**notes**') ||
-      lower.includes('**tips**') ||
-      lower.includes('**for success')
-    ) {
-      state = 'notes';
-      if (!recipe.notes) recipe.notes = '';
-      continue;
-    }
-
-    // ── Ingredients parsing ─────────────────────────────────────────────
-    if (state === 'ingredients') {
-      // Match bullet lines: - , * , • , or lines starting with number
-      if (/^[-*•]\s*/.test(line) || /^\d+\.\s/.test(line)) {
-        const cleaned = line.replace(/^[-*•]\s*|\d+\.\s*/, '').trim();
-        if (cleaned) {
-          const ing = parseIngredient(cleaned);
-          if (ing) {
-            recipe.ingredients!.push(ing);
-            currentIng = ing;
-          }
+        // ── Extract source URL (anywhere) ─────────────────────────────────────
+        if (!recipe.source_url) {
+            const urlMatch = line.match(/https?:\/\/(?:www\.)?(youtube\.com|youtu\.be)\/[^\s.,)]+/i);
+            if (urlMatch) {
+                recipe.source_url = urlMatch[0].replace(/[).,]$/, '');
+            }
         }
-      }
-      // Subheadings like **For the chicken:** → treat as category or skip
-      else if (line.startsWith('**') && line.endsWith(':**')) {
-        // Optional: could set category on next ingredients
-        // For now, just continue (subheadings are common in Grok outputs)
-        continue;
-      }
-      // Continuation lines for previous ingredient
-      else if (currentIng && line && !line.startsWith('**') && !line.startsWith('###')) {
-        currentIng.notes = (currentIng.notes || '') + (currentIng.notes ? ' ' : '') + line;
-      }
-    }
 
-    // ── Instructions parsing ────────────────────────────────────────────
-    if (state === 'instructions') {
-      if (/^\d+\.\s/.test(line) || /^[-*•]\s/.test(line)) {
-        const step = line.replace(/^\d+\.\s*|^[-*•]\s*/, '').trim();
-        if (step) {
-          recipe.instructions!.push(step);
+        // ── Title extraction ──────────────────────────────────────────────────
+        if (!recipe.title) {
+            // Prefer bold text in intro (most common Grok pattern)
+            const boldMatch = line.match(/\*\*(.*?)\*\*/);
+            if (boldMatch && boldMatch[1].length > 5 && !boldMatch[1].toLowerCase().includes('channel')) {
+                recipe.title = boldMatch[1].trim().replace(/^["']|["']$/g, ''); // remove quotes
+                continue;
+            }
+
+            // Fallback: first substantial non-list line
+            if (state === 'none' && line.length > 15 && !line.startsWith('-') && !line.startsWith('**For') && !lowerLine.includes('serves')) {
+                recipe.title = line.trim().replace(/\.$/, '');
+            }
         }
-      }
-      // Multi-line step continuation
-      else if (recipe.instructions!.length > 0 && line && !line.startsWith('**') && !line.startsWith('###')) {
-        recipe.instructions![recipe.instructions!.length - 1] += ' ' + line;
-      }
+
+        // ── Collect intro text (before first section header) ──────────────────
+        if (state === 'none' && !lowerLine.match(/###|ingredients|instructions|method|tips|notes/)) {
+            introLines.push(line);
+        }
+
+        // ── Servings from intro/metadata ─────────────────────────────────────
+        if (lowerLine.includes('serves') || lowerLine.includes('makes about') || lowerLine.includes('serving')) {
+            const numMatch = lowerLine.match(/(\d+)(?:-|–|to)(\d+)|(\d+)/);
+            if (numMatch) {
+                const servings = numMatch[3] ? parseInt(numMatch[3], 10) : parseInt(numMatch[1], 10);
+                if (!isNaN(servings) && servings > 0) recipe.servings = servings;
+            }
+        }
+
+        // Detect prep/cook time lines (e.g. "Prep time ~20 minutes", "bake time ~50-55 minutes")
+        if (!recipe.prep_time || !recipe.cook_time) {
+            const timeMatch = line.match(/(prep|active|cook|bake|roast|total)\s*(?:time)?\s*[:~-]?\s*([\d\s-–]+)\s*(min|minute|minutes|hr|hour|hours)/i);
+            if (timeMatch) {
+                const type = timeMatch[1].toLowerCase();
+                const timeStr = timeMatch[2] + ' ' + timeMatch[3];
+                const minutes = timeToMinutes(timeStr);
+                if (minutes !== null) {
+                    if (type.includes('prep') || type.includes('active')) {
+                        recipe.prep_time = minutes;
+                    } else if (type.includes('cook') || type.includes('bake') || type.includes('roast')) {
+                        recipe.cook_time = minutes;
+                    } else if (type.includes('total')) {
+                        // Optional: split if needed
+                        recipe.cook_time = minutes;
+                    }
+                }
+            }
+        }
+
+        // ── Section detection (flexible keywords + header patterns) ───────────
+        if (lowerLine.includes('ingredients') || lowerLine.match(/^\s*###\s*.*ingredients/i)) {
+            state = 'ingredients';
+            continue;
+        }
+
+        if (
+            lowerLine.includes('instructions') ||
+            lowerLine.includes('step-by-step') ||
+            lowerLine.includes('method') ||
+            lowerLine.includes('full step') ||
+            lowerLine.match(/^\s*###\s*.*(step|method|instructions)/i)
+        ) {
+            state = 'instructions';
+            continue;
+        }
+
+        if (
+            lowerLine.includes('tips') ||
+            lowerLine.includes('notes') ||
+            lowerLine.includes('success') ||
+            lowerLine.includes('suggestions') ||
+            lowerLine.includes('serve') ||
+            lowerLine.match(/^\s*###\s*.*(tips|notes|success|suggestions|serve)/i)
+        ) {
+            state = 'notes';
+            if (!recipe.notes) recipe.notes = '';
+            continue;
+        }
+
+        // ── Ingredients parsing ───────────────────────────────────────────────
+        if (state === 'ingredients') {
+            // Subheading (e.g. **For the Kebab Meat (about 800 g total):**) 
+            if (line.startsWith('**') && line.endsWith(':**')) {
+                const category = line.replace(/^\*\*(.*?):\*\*$/, '$1').trim();
+                warnings.push(`Detected subheading: "${category}" – following ingredients grouped under it`);
+                // You could store category on next ingredients if you add a category field later
+                continue;
+            }
+
+            // Bullet or numbered line
+            if (/^[-*•]|\d+\.\s/.test(line)) {
+                const cleaned = line.replace(/^[-*•]|\d+\.\s*/, '').trim();
+                if (cleaned) {
+                    const ing = parseIngredient(cleaned);
+                    if (ing) {
+                        recipe.ingredients!.push(ing as Ingredient);
+                        currentIng = ing;
+                    }
+                }
+            }
+            // Continuation line for previous ingredient
+            else if (currentIng && line && !line.startsWith('**') && !line.startsWith('###')) {
+                currentIng.notes = (currentIng.notes || '') + (currentIng.notes ? ' ' : '') + line.trim();
+            }
+        }
+
+        // ── Instructions parsing ──────────────────────────────────────────────
+        if (state === 'instructions') {
+            if (/^\d+\.\s|^[-*•]\s/.test(line)) {
+                let step = line.replace(/^\d+\.\s*|^[-*•]\s*/, '').trim();
+                // Clean bold sub-titles if present
+                step = step.replace(/^\*\*(.*?):\*\*\s*/, '$1: ');
+                if (step) {
+                    recipe.instructions!.push(step);
+                }
+            }
+            // Append continuation to last step
+            else if (recipe.instructions!.length > 0 && line && !line.startsWith('**') && !line.startsWith('###')) {
+                recipe.instructions![recipe.instructions!.length - 1] += ' ' + line.trim();
+            }
+        }
+
+        // ── Notes / Tips ──────────────────────────────────────────────────────
+        if (state === 'notes') {
+            if (line && !line.startsWith('**') && !line.startsWith('###')) {
+                recipe.notes += (recipe.notes ? '\n' : '') + line.trim();
+            }
+        }
     }
 
-    // ── Notes / Tips ────────────────────────────────────────────────────
-    if (state === 'notes') {
-      if (line && !line.startsWith('**') && !line.startsWith('###')) {
-        recipe.notes += (recipe.notes ? '\n' : '') + line;
-      }
+    // ── Post-processing & fallbacks ───────────────────────────────────────
+    if (!recipe.title) {
+        return { recipe: null, error: 'Could not detect recipe title' };
     }
-  }
 
-  // ── Final validation & fallbacks ────────────────────────────────────
-  if (!recipe.title) {
-    return { recipe: null, error: 'Could not detect recipe title' };
-  }
+    // Fallback: use intro text as notes if no dedicated notes/tips section
+    if (introLines.length > 0 && (!recipe.notes || recipe.notes.trim().length < 20)) {
+        recipe.notes = introLines.join('\n').trim();
+        warnings.push('No separate tips/notes section found – used intro paragraph as notes');
+    }
 
-  if (recipe.ingredients!.length === 0) {
-    return { recipe: null, error: 'No ingredients found' };
-  }
+    if (recipe.notes) {
+        recipe.notes = recipe.notes.trim();
+    }
 
-  if (recipe.instructions!.length === 0) {
-    return { recipe: null, error: 'No instructions found' };
-  }
+    if (recipe.ingredients!.length === 0) {
+        warnings.push('No ingredients were parsed – check the markdown format');
+    }
 
-  // Clean up notes
-  if (recipe.notes) {
-    recipe.notes = recipe.notes.trim();
-  }
+    if (recipe.instructions!.length === 0) {
+        warnings.push('No instructions were parsed – check the markdown format');
+    }
 
-  return {
-    recipe: recipe as RecipeInsert,
-    warnings: warnings.length > 0 ? warnings : undefined,
-  };
+    // Return even partial results with warnings instead of hard failure
+    if (recipe.title && recipe.ingredients!.length > 0 && recipe.instructions!.length > 0) {
+        return {
+            recipe: recipe as RecipeInsert,
+            warnings: warnings.length > 0 ? warnings : undefined,
+        };
+    }
+
+    return {
+        recipe: null,
+        error: 'Incomplete recipe: missing key sections (ingredients or instructions)',
+        warnings: warnings.length > 0 ? warnings : undefined,
+    };
 }
 
-// ── Helper: parse ingredient line ───────────────────────────────────────
-function parseIngredient(text: string): Ingredient {
-  // Try to split amount + unit + name
-  const match = text.match(/^([\d½¼¾⅓⅔⅛\s\/.-]+)?\s*([a-zA-Z\s]+)?\s*(.+)$/i);
+// ── Improved parseIngredient ─────────────────────────────────────────────
+function parseIngredient(text: string): Partial<Ingredient> | null {
+    text = text.trim().replace(/\s+/g, ' ');
 
-  let amount = '1';
-  let unit = '';
-  let name = text.trim();
+    // Capture amount (with ~, ranges, fractions)
+    const amountMatch = text.match(/^([~≈]?\s*[\d½¼¾⅓⅔⅛\s\/.-]+(?:-\s*[\d½¼¾⅓⅔⅛\s\/.-]+)?)\s*/i);
+    let amount = amountMatch ? amountMatch[1].trim() : '1';
 
-  if (match) {
-    [, amount = '1', unit = '', name = ''] = match.map(s => s?.trim() || '');
+    const rest = text.replace(amountMatch?.[0] || '', '').trim();
 
-    if (!name && unit) {
-      name = unit;
-      unit = '';
+    // Unit(s) – greedy until name
+    const unitMatch = rest.match(/^([a-zA-Z]+(?:\s+[a-zA-Z]+)?(?:\s*\([^)]*\))?)\s+(.*)/i);
+    let unit = '';
+    let name = rest;
+
+    if (unitMatch) {
+        unit = unitMatch[1].trim();
+        name = unitMatch[2].trim();
+    }
+
+    // Extract trailing notes in parentheses
+    const notesMatch = name.match(/^(.*?)\s*\(([^)]+)\)$/);
+    let notes: string | undefined;
+    if (notesMatch) {
+        name = notesMatch[1].trim();
+        notes = notesMatch[2].trim();
     }
 
     amount = amount.replace(/\s+/g, ' ').trim();
     unit = unit.replace(/,$/, '').trim();
     name = name.trim();
-  }
 
-  return {
-    amount,
-    unit,
-    name: name || text.trim(),
-    notes: undefined,
-    category: undefined, // you can add guessing later if needed
-  };
+    if (!name) return null;
+
+    return {
+        amount,
+        unit,
+        name,
+        notes,
+        category: undefined, // could be set from subheadings if added later
+    };
 }
 
-// ── Helper: time string to minutes ──────────────────────────────────────
 function timeToMinutes(str: string): number | null {
-  if (!str) return null;
-  const clean = str.toLowerCase().replace(/about|approx|roughly/gi, '').trim();
-
-  let total = 0;
-  const hMatch = clean.match(/(\d+)\s*(h|hour|hr)s?/i);
-  const mMatch = clean.match(/(\d+)\s*(m|min|minute)s?/i);
-
-  if (hMatch) total += parseInt(hMatch[1], 10) * 60;
-  if (mMatch) total += parseInt(mMatch[1], 10);
-
-  return total > 0 ? total : null;
-}
+    if (!str) return null;
+    const clean = str.toLowerCase().replace(/about|approx|roughly/gi, '').trim();
+  
+    // Handle ranges like "50-55" → average
+    const rangeMatch = clean.match(/(\d+)[–-–](\d+)/);
+    if (rangeMatch) {
+      const min = parseInt(rangeMatch[1], 10);
+      const max = parseInt(rangeMatch[2], 10);
+      if (!isNaN(min) && !isNaN(max)) {
+        return Math.round((min + max) / 2);
+      }
+    }
+  
+    let total = 0;
+    const hMatch = clean.match(/(\d+)\s*(h|hour|hr)s?/i);
+    const mMatch = clean.match(/(\d+)\s*(m|min|minute)s?/i);
+  
+    if (hMatch) total += parseInt(hMatch[1], 10) * 60;
+    if (mMatch) total += parseInt(mMatch[1], 10);
+  
+    return total > 0 ? total : null;
+  }
