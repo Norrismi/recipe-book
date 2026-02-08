@@ -65,32 +65,32 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center p-4">
+    <div className="min-h-screen flex items-center justify-center p-4 bg-[var(--background)]">
       {/* Decorative background pattern */}
       <div 
         className="fixed inset-0 opacity-5 pointer-events-none"
         style={{
-          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%234A6F4A' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
+          backgroundImage: `url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%230D9488' fill-opacity='0.4'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E")`,
         }}
       />
 
       <div className="w-full max-w-md">
         {/* Logo / Header */}
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-16 h-16 bg-sage-100 rounded-full mb-4">
+          <div className="inline-flex items-center justify-center w-16 h-16 bg-[var(--muted)] rounded-full mb-4">
             <span className="text-3xl">🍳</span>
           </div>
-          <h1 className="text-3xl font-display font-semibold text-sage-800">
+          <h1 className="text-3xl font-display font-semibold text-[var(--foreground)]">
             Mom&apos;s Recipe Book
           </h1>
-          <p className="text-sage-600 mt-2">
+          <p className="text-[var(--muted-foreground)] mt-2">
             Your personal digital cookbook
           </p>
         </div>
 
         {/* Login Card */}
-        <div className="bg-white rounded-2xl shadow-card p-8">
-          <h2 className="text-xl font-semibold text-sage-800 mb-6 text-center">
+        <div className="bg-[var(--card)] rounded-2xl p-8 border border-[var(--border)]">
+          <h2 className="text-xl font-semibold text-[var(--foreground)] mb-6 text-center">
             Welcome Back
           </h2>
 
@@ -99,8 +99,8 @@ export default function LoginPage() {
             <div
               className={`mb-6 p-4 rounded-lg text-sm ${
                 message.type === "success"
-                  ? "bg-sage-50 text-sage-700 border border-sage-200"
-                  : "bg-red-50 text-red-700 border border-red-200"
+                  ? "bg-green-900/30 text-green-200 border border-green-700/50"
+                  : "bg-red-900/30 text-red-200 border border-red-700/50"
               }`}
             >
               {message.text}
@@ -112,7 +112,7 @@ export default function LoginPage() {
             <div>
               <label
                 htmlFor="email"
-                className="block text-sm font-medium text-sage-700 mb-2"
+                className="block text-sm font-medium text-[var(--muted-foreground)] mb-2"
               >
                 Email Address
               </label>
@@ -124,8 +124,10 @@ export default function LoginPage() {
                 placeholder="your@email.com"
                 required
                 disabled={loading}
-                className="w-full px-4 py-3 border border-sage-200 rounded-lg 
-                         focus:ring-2 focus:ring-sage-400 focus:border-transparent
+                className="w-full px-4 py-3 border border-[var(--border)] rounded-lg 
+                         bg-[var(--background)] text-[var(--foreground)] 
+                         placeholder-[var(--muted-foreground)]
+                         focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50
                          disabled:opacity-50 disabled:cursor-not-allowed
                          transition-all duration-200"
               />
@@ -134,7 +136,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading || !email}
-              className="w-full py-3 px-4 bg-sage-600 hover:bg-sage-700 
+              className="w-full py-3 px-4 bg-[var(--accent)] hover:bg-[var(--accent)]/90
                        text-white font-medium rounded-lg
                        disabled:opacity-50 disabled:cursor-not-allowed
                        transition-colors duration-200
@@ -176,10 +178,10 @@ export default function LoginPage() {
           {/* Divider */}
           <div className="relative my-6">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-sage-200" />
+              <div className="w-full border-t border-[var(--border)]" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-sage-500">or continue with</span>
+              <span className="px-4 bg-[var(--card)] text-[var(--muted-foreground)]">or continue with</span>
             </div>
           </div>
 
@@ -187,8 +189,8 @@ export default function LoginPage() {
           <button
             onClick={handleGoogleLogin}
             disabled={loading}
-            className="w-full py-3 px-4 bg-white border border-sage-200 
-                     hover:bg-sage-50 text-sage-700 font-medium rounded-lg
+            className="w-full py-3 px-4 bg-[var(--card)] border border-[var(--border)]
+                     hover:bg-[var(--muted)] text-[var(--foreground)] font-medium rounded-lg
                      disabled:opacity-50 disabled:cursor-not-allowed
                      transition-colors duration-200
                      flex items-center justify-center gap-3"
@@ -216,13 +218,13 @@ export default function LoginPage() {
           </button>
 
           {/* Help text */}
-          <p className="mt-6 text-center text-sm text-sage-500">
+          <p className="mt-6 text-center text-sm text-[var(--muted-foreground)]">
             No password needed! We&apos;ll email you a secure link to sign in.
           </p>
         </div>
 
         {/* Footer */}
-        <p className="mt-8 text-center text-sm text-sage-400">
+        <p className="mt-8 text-center text-sm text-[var(--muted-foreground)]">
           Made with ❤️ for the family
         </p>
       </div>

@@ -4,14 +4,14 @@
 
 /* Semantic CSS variables for light/dark mode */
 :root {
-  --background: #FAFAF9;           /* stone-50 - softer white */
-  --foreground: #1C1917;           /* stone-900 - crisp dark text */
-  --card: #FFFFFF;                 /* white cards */
-  --card-foreground: #1C1917;      /* stone-900 */
-  --muted: #F5F5F4;                /* stone-100 - subtle backgrounds */
-  --muted-foreground: #78716C;     /* stone-500 - muted text */
+  --background: #F5F5F4;           /* stone-100 - darker, more gray */
+  --foreground: #0C0A09;           /* stone-950 - darker text */
+  --card: #FAFAF9;                 /* stone-50 - slightly off-white cards */
+  --card-foreground: #0C0A09;      /* stone-950 */
+  --muted: #E7E5E4;                /* stone-200 - darker muted backgrounds */
+  --muted-foreground: #57534E;     /* stone-600 - darker muted text */
   --accent: #0D9488;               /* teal-600 - fresh, modern accent */
-  --border: #E7E5E4;               /* stone-200 - clean borders */
+  --border: #D6D3D1;               /* stone-300 - more visible borders */
 }
 
 /* Dark mode - professional slate palette */

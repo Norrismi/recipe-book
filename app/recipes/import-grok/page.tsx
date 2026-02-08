@@ -3,7 +3,8 @@
 
 import { useState } from 'react';
 import { importGrokRecipe } from '@/app/actions/recipes';
-import Link from 'next/link';
+import { useRouter } from 'next/navigation';
+import Navigation from '@/components/Navigation';
 
 type ImportGrokResult = {
     success: boolean;
@@ -14,6 +15,7 @@ type ImportGrokResult = {
 
 
 export default function ImportGrokPage() {
+    const router = useRouter();
     const [markdown, setMarkdown] = useState('');
     const [result, setResult] = useState<ImportGrokResult>(null);
     const [loading, setLoading] = useState(false);
@@ -32,7 +34,10 @@ export default function ImportGrokPage() {
 
             if (response.success) {
                 setResult(response);
-                setMarkdown(''); // clear input after success (optional)
+                // Redirect to the recipe after successful import
+                if (response.recipeId) {
+                    router.push(`/recipes/${response.recipeId}`);
+                }
             } else {
                 setError(response.error || 'Import failed');
             }
@@ -45,76 +50,88 @@ export default function ImportGrokPage() {
     };
 
     return (
-        <div className="max-w-4xl mx-auto py-8 px-4 sm:px-6 lg:px-8 bg-[var(--background)] text-[var(--foreground)]">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-[var(--foreground)]">Import Recipe from Grok</h1>
-                <p className="mt-2 text-[var(--muted-foreground)]">
-                    Paste the full markdown response Grok gave you (title, ingredients, instructions, etc.)
-                </p>
-            </div>
+        <div className="min-h-screen bg-[var(--background)] text-[var(--foreground)]">
+            <Navigation />
+            
+            <main className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <h1 className="text-3xl font-display font-semibold text-[var(--foreground)] mb-6">
+                    Import Recipe from Grok
+                </h1>
 
-            <textarea
-                value={markdown}
-                onChange={(e) => setMarkdown(e.target.value)}
-                placeholder="Paste the entire Grok recipe here..."
-                className="w-full h-96 p-4 border border-[var(--border)] rounded-lg font-mono text-sm 
-                         bg-[var(--card)] text-[var(--foreground)] placeholder-[var(--muted-foreground)]
-                         focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50"
-                disabled={loading}
-            />
+                {/* Error Message */}
+                {error && (
+                    <div className="mb-6 p-4 bg-red-900/30 border border-red-700/50 text-red-200 rounded-lg">
+                        {error}
+                    </div>
+                )}
 
-            <div className="mt-6 flex flex-wrap gap-4">
-                <button
-                    onClick={handleImport}
-                    disabled={loading || !markdown.trim()}
-                    className="px-6 py-3 bg-[var(--accent)] text-white font-medium rounded-lg 
-                             hover:bg-[var(--accent)]/90 disabled:opacity-50 disabled:cursor-not-allowed transition"
-                >
-                    {loading ? 'Importing...' : 'Import Recipe'}
-                </button>
-
-                <Link
-                    href="/recipes"
-                    className="px-6 py-3 border border-[var(--border)] text-[var(--foreground)] font-medium rounded-lg 
-                             hover:bg-[var(--muted)] transition"
-                >
-                    Back to Recipes
-                </Link>
-            </div>
-
-            {error && (
-                <div className="mt-6 p-4 bg-red-900/30 border border-red-700/50 text-red-200 rounded-lg">
-                    {error}
-                </div>
-            )}
-
-            {result?.success && (
-                <div className="mt-8 p-6 bg-green-900/30 border border-green-700/50 rounded-lg">
-                    <h2 className="text-xl font-semibold text-green-200">Success!</h2>
-                    <p className="mt-2 text-green-100">
-                        Recipe imported with ID: <strong>{result.recipeId}</strong>
-                    </p>
-                    <div className="mt-4">
-                        <Link
-                            href={`/recipes/${result.recipeId}`}
-                            className="text-[var(--accent)] hover:underline font-medium"
-                        >
-                            → View the imported recipe
-                        </Link>
+                {/* Import Form */}
+                <div className="bg-[var(--card)] rounded-xl p-6 shadow-card border border-[var(--border)] space-y-4">
+                    <div>
+                        <label className="block text-sm font-medium text-[var(--muted-foreground)] mb-2">
+                            Paste Grok Recipe
+                        </label>
+                        <p className="text-sm text-[var(--muted-foreground)] mb-4">
+                            Paste the full markdown response Grok gave you (title, ingredients, instructions, etc.)
+                        </p>
+                        <textarea
+                            value={markdown}
+                            onChange={(e) => setMarkdown(e.target.value)}
+                            placeholder="Paste the entire Grok recipe here..."
+                            rows={20}
+                            disabled={loading}
+                            className="w-full px-4 py-3 border border-[var(--border)] rounded-lg 
+                                     bg-[var(--background)] text-[var(--foreground)] 
+                                     placeholder-[var(--muted-foreground)] font-mono text-sm
+                                     focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)]/50
+                                     disabled:opacity-50 resize-none"
+                        />
                     </div>
 
-                    {result?.success && result.warnings && result.warnings.length > 0 && (
-                        <div className="mt-6">
-                            <h3 className="font-medium text-amber-200">Warnings / notes from parser:</h3>
-                            <ul className="mt-2 list-disc pl-5 text-sm text-amber-100">
-                                {result.warnings.map((w, i) => (
-                                    <li key={i}>{w}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    )}
+                    {/* Buttons */}
+                    <div className="flex gap-4 flex-col sm:flex-row">
+                        <button
+                            type="button"
+                            onClick={() => router.back()}
+                            className="px-6 py-3 border border-[var(--border)] text-[var(--muted-foreground)] font-medium 
+                                     rounded-lg hover:bg-[var(--muted)] transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button
+                            onClick={handleImport}
+                            disabled={loading || !markdown.trim()}
+                            className="flex-1 px-6 py-3 bg-[var(--accent)] text-white font-medium rounded-lg
+                                     hover:bg-[var(--accent)]/90 disabled:opacity-50 disabled:cursor-not-allowed
+                                     transition-colors flex items-center justify-center gap-2"
+                        >
+                            {loading ? (
+                                <>
+                                    <span className="animate-spin">⏳</span>
+                                    <span>Importing...</span>
+                                </>
+                            ) : (
+                                <>
+                                    <span>🤖</span>
+                                    <span>Import Recipe</span>
+                                </>
+                            )}
+                        </button>
+                    </div>
                 </div>
-            )}
+
+                {/* Success/Warning Messages */}
+                {result?.success && result.warnings && result.warnings.length > 0 && (
+                    <div className="mt-6 p-6 bg-amber-900/30 border border-amber-700/50 rounded-lg">
+                        <h3 className="font-medium text-amber-200 mb-2">Import Warnings</h3>
+                        <ul className="list-disc pl-5 text-sm text-amber-100 space-y-1">
+                            {result.warnings.map((w, i) => (
+                                <li key={i}>{w}</li>
+                            ))}
+                        </ul>
+                    </div>
+                )}
+            </main>
         </div>
     );
 }
