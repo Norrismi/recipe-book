@@ -4,26 +4,26 @@
 
 /* Semantic CSS variables for light/dark mode */
 :root {
-  --background: #FDF8F3;           /* cream - your light bg */
-  --foreground: #1F2F1F;           /* sage-900 - dark text */
+  --background: #FAFAF9;           /* stone-50 - softer white */
+  --foreground: #1C1917;           /* stone-900 - crisp dark text */
   --card: #FFFFFF;                 /* white cards */
-  --card-foreground: #1F2F1F;      /* sage-900 */
-  --muted: #F5EEE6;                /* parchment */
-  --muted-foreground: #4A6F4A;     /* sage-500 - subtle text */
-  --accent: #EC7426;               /* spice-500 - your warm accent */
-  --border: #C5D4C5;               /* sage-200 - light borders */
+  --card-foreground: #1C1917;      /* stone-900 */
+  --muted: #F5F5F4;                /* stone-100 - subtle backgrounds */
+  --muted-foreground: #78716C;     /* stone-500 - muted text */
+  --accent: #0D9488;               /* teal-600 - fresh, modern accent */
+  --border: #E7E5E4;               /* stone-200 - clean borders */
 }
 
-/* Dark mode overrides - nice dark slate with subtle blue undertone */
+/* Dark mode - professional slate palette */
 .dark {
-  --background: hsl(222.2 84% 4.9%);    /* ~slate-950: deep cozy dark */
-  --foreground: hsl(210 40% 98%);       /* ~slate-50: crisp light text */
-  --card: hsl(222.2 84% 9.8%);          /* ~slate-900: slightly lighter surfaces */
-  --card-foreground: hsl(210 40% 98%);
-  --muted: hsl(217.2 32.6% 17.5%);      /* ~slate-800 muted bg */
-  --muted-foreground: hsl(215 20.2% 65.1%); /* ~slate-400 subtle text */
-  --accent: hsl(217 91% 60%);           /* brighter indigo/blue-500 for accents/pop */
-  --border: hsl(217.2 32.6% 27.5%);     /* ~slate-700 borders */
+  --background: #0F172A;           /* slate-900 - deep professional dark */
+  --foreground: #F1F5F9;           /* slate-100 - clean readable text */
+  --card: #1E293B;                 /* slate-800 - elevated surfaces */
+  --card-foreground: #F1F5F9;      /* slate-100 */
+  --muted: #334155;                /* slate-700 - muted backgrounds */
+  --muted-foreground: #94A3B8;     /* slate-400 - secondary text */
+  --accent: #14B8A6;               /* teal-500 - vibrant accent for dark */
+  --border: #334155;               /* slate-700 - subtle borders */
 }
 
 /* Apply variables globally with smooth transition */
@@ -33,17 +33,31 @@ body {
   transition: background-color 0.3s ease, color 0.3s ease;
 }
 
+/* Card shadows - subtle in light, none in dark */
+.shadow-card {
+  box-shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+}
+
+.dark .shadow-card {
+  box-shadow: none !important;
+}
+
+/* Remove ALL shadows in dark mode */
+.dark [class*="shadow"] {
+  box-shadow: none !important;
+}
+
 /* Adjust scrollbar for dark mode */
 .dark ::-webkit-scrollbar-track {
-  background: hsl(222.2 84% 9.8%);      /* ~slate-900 */
+  background: #1E293B;              /* slate-800 */
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: hsl(217.2 32.6% 27.5%);   /* ~slate-700 */
+  background: #475569;              /* slate-600 */
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: hsl(217.2 32.6% 37.5%);   /* lighter on hover */
+  background: #64748B;              /* slate-500 - lighter on hover */
 }
 
 /* Custom scrollbar for a cleaner look */
@@ -151,5 +165,11 @@ textarea:focus,
 select:focus {
   outline: none;
   ring: 2px;
-  ring-color: #6E936E;
+  ring-color: #0D9488;
+}
+
+.dark input:focus,
+.dark textarea:focus,
+.dark select:focus {
+  ring-color: #14B8A6;
 }

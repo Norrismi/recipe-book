@@ -23,48 +23,63 @@ export default function BulkRecipeImport({ onImportComplete, onCancel }: BulkRec
     const lines = text.split("\n").filter(line => line.trim());
     
     return lines.map(line => {
-      const trimmed = line.trim();
+      let trimmed = line.trim();
       
       if (parseMode === "simple") {
-        // Simple mode: just put everything in the name field
         return { amount: "", unit: "", name: trimmed };
       }
 
-      // Smart mode: try to parse amount, unit, and name
-      // Remove common prefixes like bullets, numbers, dashes
-      const cleaned = trimmed.replace(/^[•\-*\d]+\.?\s*/, "");
+      // Remove bullets/dashes at start
+      trimmed = trimmed.replace(/^[•\-*]\s*/, "");
       
-      // Common patterns:
-      // "2 cups flour" -> amount: 2, unit: cups, name: flour
-      // "1/2 tsp salt" -> amount: 1/2, unit: tsp, name: salt
-      // "3-4 cloves garlic" -> amount: 3-4, unit: cloves, name: garlic
-      // "flour" -> amount: "", unit: "", name: flour
+      // Split into words
+      const words = trimmed.split(/\s+/);
+      if (words.length === 0) return { amount: "", unit: "", name: "" };
       
-      // Match: [number/fraction] [unit] [rest of line]
-      const pattern = /^([\d\/-]+(?:\s+\d+\/\d+)?)\s+([a-zA-Z]+)(?:\s+(.+))?$/;
-      const match = cleaned.match(pattern);
+      let amount = "";
+      let unit = "";
+      let nameStart = 0;
       
-      if (match) {
-        const amount = match[1].trim();
-        const unit = match[2].trim();
-        const name = match[3] ? match[3].trim() : "";
-        return { amount, unit, name };
+      // Check if first word is a number/fraction (including unicode fractions)
+      const firstWord = words[0];
+      if (/^[\d½⅓¼¾⅔⅛⅜⅝⅞\/\-]+$/.test(firstWord)) {
+        amount = firstWord;
+        nameStart = 1;
+        
+        // Check if second word is also a number (for mixed fractions like "1 1/2")
+        if (words.length > 1 && /^[\d\/]+$/.test(words[1])) {
+          amount = `${amount} ${words[1]}`;
+          nameStart = 2;
+        }
       }
       
-      // Try without unit: "2 eggs" -> amount: 2, unit: "", name: eggs
-      const noUnitPattern = /^([\d\/-]+(?:\s+\d+\/\d+)?)\s+(.+)$/;
-      const noUnitMatch = cleaned.match(noUnitPattern);
-      
-      if (noUnitMatch) {
-        return {
-          amount: noUnitMatch[1].trim(),
-          unit: "",
-          name: noUnitMatch[2].trim()
-        };
+      // If we found an amount, check if next word is a unit
+      if (amount && nameStart < words.length) {
+        const possibleUnit = words[nameStart];
+        // Common units (case insensitive check)
+        const units = ['cup', 'cups', 'tsp', 'tsps', 'teaspoon', 'teaspoons', 
+                       'tbsp', 'tbsps', 'tablespoon', 'tablespoons',
+                       'oz', 'ounce', 'ounces', 'lb', 'lbs', 'pound', 'pounds',
+                       'g', 'gram', 'grams', 'kg', 'kilogram', 'kilograms',
+                       'ml', 'milliliter', 'milliliters', 'l', 'liter', 'liters',
+                       'clove', 'cloves', 'piece', 'pieces', 'pinch', 'dash',
+                       'can', 'cans', 'jar', 'jars', 'package', 'packages'];
+        
+        if (units.includes(possibleUnit.toLowerCase())) {
+          unit = possibleUnit;
+          nameStart++;
+        }
       }
       
-      // Couldn't parse - put it all in name
-      return { amount: "", unit: "", name: cleaned };
+      // Everything else is the name
+      const name = words.slice(nameStart).join(" ");
+      
+      // If no amount was found, put everything in name
+      if (!amount && !unit) {
+        return { amount: "", unit: "", name: trimmed };
+      }
+      
+      return { amount, unit, name };
     }).filter(ing => ing.name || ing.amount);
   };
 
